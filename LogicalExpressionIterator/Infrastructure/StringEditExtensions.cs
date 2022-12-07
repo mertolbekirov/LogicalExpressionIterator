@@ -8,22 +8,31 @@ namespace LogicalExpressionIterator.Infrastructure
 {
     public static class StringEditExtensions
     {
-        public static string[] CustomSplitOnlyOnce(this string inputString, char splitter)
+        public static string[] CustomSplitOnlyOnce(this string inputString, char splitter, bool removeSpaces = false)
         {
             string[] returnArr = new string[2];
             var isSplit = false;
             for (int i = 0; i < inputString.Length; i++)
             {
+                if (removeSpaces)
+                {
+                    continue;
+                }
                 if (inputString[i] != splitter && !isSplit)
                 {
                     returnArr[0] += inputString[i];
                 }
                 else
                 {
-                    isSplit = true;
+                    if (isSplit == false)
+                    {
+                        isSplit = true;
+                        continue;
+                    }
                     returnArr[1] += inputString[i];
                 }
             }
+
 
             return returnArr;
         }
