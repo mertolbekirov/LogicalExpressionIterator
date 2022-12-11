@@ -32,17 +32,17 @@ namespace LogicalExpressionIterator.Models
         public override bool Value { get
             {
                 var length = Operands.Count;
-                var lastVal = Operands.GetAt(0).Value;
+                var lastVal = Operands[0].Value;
 
                 for (int i = 0; i < length - 1; i++)
                 {
                     switch (Operator)
                     {
                         case '&':
-                            lastVal = lastVal & Operands.GetAt(i+1).Value;
+                            lastVal = lastVal & Operands[i+1].Value;
                             break;
                         case '|':
-                            lastVal = lastVal | Operands.GetAt(i + 1).Value;
+                            lastVal = lastVal | Operands[i+1].Value;
                             break;
                         case '!':
                             lastVal = !lastVal;

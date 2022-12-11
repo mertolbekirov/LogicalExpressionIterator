@@ -9,108 +9,75 @@ namespace LogicalExpressionIterator.Infrastructure
 {
     public class CustomList<T>
     {
-        private T[] data;
-        private int count = 0;
-        private int capacity;
+        private T[] _items;
+        private int _count;
 
-        public CustomList(int initialCapacity = 8)
+        public CustomList()
         {
-            if (initialCapacity < 1) initialCapacity = 1;
-            this.capacity = initialCapacity;
-            data = new T[initialCapacity];
+            _items = new T[10];
+            _count = 0;
         }
 
-        public int Count { get { return count; } }
-        public bool IsEmpty { get { return count == 0; } }
-
-        public T GetAt(int index)
+        public void Add(T item)
         {
-            ThrowIfIndexOutOfRange(index);
-            return data[index];
-        }
-
-        public void SetAt(T newElement, int index)
-        {
-            ThrowIfIndexOutOfRange(index);
-            data[index] = newElement;
-        }
-
-        public void InsertAt(T newElement, int index)
-        {
-            ThrowIfIndexOutOfRange(index);
-            if (count == capacity)
+            if (_count == _items.Length)
             {
-                Recount();
+                T[] newItems = new T[_items.Length * 2];
+                Array.Copy(_items, newItems, _items.Length);
+                _items = newItems;
             }
 
-            for (int i = count; i > index; i--)
-            {
-                data[i] = data[i - 1];
-            }
-
-            data[index] = newElement;
-            count++;
+            _items[_count] = item;
+            _count++;
         }
 
-        public void DeleteAt(int index)
+        public T this[int index]
         {
-            ThrowIfIndexOutOfRange(index);
-            for (int i = index; i < count - 1; i++)
+            get
             {
-                data[i] = data[i + 1];
-            }
-
-            data[count - 1] = default(T);
-            count--;
-        }
-
-        public void Add(T newElement)
-        {
-            if (count == capacity)
-            {
-                Recount();
-            }
-
-            data[count] = newElement;
-            count++;
-        }
-
-        public bool Contains(T value)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                T currentValue = data[i];
-                if (currentValue.Equals(value))
+                if (index < 0 || index >= _count)
                 {
-                    return true;
+                    throw new IndexOutOfRangeException();
                 }
+
+                return _items[index];
             }
-            return false;
-        }
-
-        public void Clear()
-        {
-            data = new T[capacity];
-            count = 0;
-        }
-
-        private void Recount()
-        {
-            T[] recountd = new T[capacity * 2];
-            for (int i = 0; i < capacity; i++)
+            set
             {
-                recountd[i] = data[i];
+                if (index < 0 || index >= _count)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
+                _items[index] = value;
             }
-            data = recountd;
-            capacity = capacity * 2;
         }
 
-        private void ThrowIfIndexOutOfRange(int index)
+        public int Count
         {
-            if (index > count - 1 || index < 0)
+            get { return _count; }
+        }
+
+        public void RemoveAt(int index)
+        {
+            if (index < 0 || index >= _count)
             {
-                throw new ArgumentOutOfRangeException(string.Format("The current count of the array is {0}", count));
+                throw new IndexOutOfRangeException();
             }
+
+            for (int i = index; i < _count - 1; i++)
+            {
+                _items[i] = _items[i + 1];
+            }
+
+            _count--;
+        }
+
+        public T[] ToArray()
+        {
+            T[] array = new T[_count];
+            Array.Copy(_items, array, _count);
+            return array;
         }
     }
 }

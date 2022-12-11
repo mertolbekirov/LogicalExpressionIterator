@@ -36,5 +36,64 @@ namespace LogicalExpressionIterator.Infrastructure
 
             return returnArr;
         }
+
+        public static string[] CustomSplit(this string str, char separator)
+        {
+            var parts = new CustomList<string>();
+            var currentPart = string.Empty;
+
+            foreach (var ch in str)
+            {
+                if (ch == separator)
+                {
+                    parts.Add(currentPart);
+                    currentPart = string.Empty;
+                }
+                else
+                {
+                    currentPart += ch;
+                }
+            }
+
+            if (currentPart != string.Empty)
+            {
+                parts.Add(currentPart);
+            }
+
+            return parts.ToArray();
+        }
+
+        public static string CustomReplace(this string str, string oldValue, string newValue)
+        {
+            var sb = new SimpleStringBuilder();
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                var foundMatch = true;
+
+                for (int j = 0; j < oldValue.Length && (i + j) < str.Length; j++)
+                {
+                    if (str[i + j] != oldValue[j])
+                    {
+                        foundMatch = false;
+                        break;
+                    }
+                }
+
+                if (foundMatch)
+                {
+                    sb.Append(newValue);
+                    i += oldValue.Length - 1;
+                }
+                else
+                {
+                    sb.Append(str[i].ToString());
+                }
+            }
+
+            return sb.ToString();
+        }
     }
+
+    
 }

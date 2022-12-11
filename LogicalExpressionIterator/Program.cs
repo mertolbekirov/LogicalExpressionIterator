@@ -21,14 +21,14 @@ while (true)
     switch (command)
     {
         case "DEFINE":
-            var commandArr = inputArr = inputArr[1].CustomSplitOnlyOnce(':');
+            var commandArr = inputArr[1].CustomSplitOnlyOnce(':');
 
             var functionSignature = commandArr[0];
             var function = commandArr[1];
 
             var functionNameVariablesArr = functionSignature.CustomSplitOnlyOnce('(');
             var functionName = functionNameVariablesArr[0];
-            var functionVariables = functionNameVariablesArr[1].CustomSplitOnlyOnce(')')[0].CustomSplitOnlyOnce(' ', true);
+            var functionVariables = functionNameVariablesArr[1].CustomReplace(" ", "").CustomReplace(")", "").CustomSplit(',');
 
             if (functionName == functionSignature)
             {
@@ -47,7 +47,7 @@ while (true)
 
             functionDict.Add(functionName, functionObj);
 
-            ReadFunction(function);
+            Console.WriteLine(RPNConvert(function)); 
 
             break;
         case "SOLVE":
@@ -61,35 +61,71 @@ while (true)
     }
 }
 
-void ReadFunction(string function)
+static string RPNConvert(string input)
 {
-    bool didQuoatationsPass = false;
-    foreach (var ch in function)
+    CustomStack<char> stack = new CustomStack<char>();
+    string str = input.CustomReplace(" ", string.Empty);
+    SimpleStringBuilder formula = new SimpleStringBuilder();
+    for (int i = 0; i < str.Length; i++)
     {
-        if ((ch != '"' || ch == ' ') && !didQuoatationsPass)
+        char x = str[i];
+        if (x == '(')
+            stack.Push(x);
+        else if (x == ')')
         {
-            continue;
+            while (stack.Count > 0 && stack.Peek() != '(')
+                formula.Append(stack.Pop());
+            stack.Pop();
+        }
+        else if (IsOperand(x))
+        {
+            formula.Append(x);
+        }
+        else if (IsOperator(x))
+        {
+            while (stack.Count > 0 && stack.Peek() != '(' && Prior(x) <= Prior(stack.Peek()))
+                formula.Append(stack.Pop());
+            stack.Push(x);
         }
         else
         {
-            if (ch == '"')
-            {
-                break;
-            }
-            didQuoatationsPass = true;
-
-            if (char.IsLetter(ch))
-            {
-                
-            }else if (ch == '(')
-            {
-
-            }
+            char y = stack.Pop();
+            if (y != '(')
+                formula.Append(y);
         }
     }
+    while (stack.Count > 0)
+    {
+        formula.Append(stack.Pop());
+    }
+    return formula.ToString();
 }
 
-OperatorNode ReadBracketsFuncRecursive(string function)
+static bool IsOperator(char c)
 {
-    return null;
+    return (c == '&' || c == '|');
+}
+static bool IsOperand(char c)
+{
+    return (c >= 'a' && c <= 'z');
+}
+static int Prior(char c)
+{
+    switch (c)
+    {
+        case '=':
+            return 1;
+        case '+':
+            return 2;
+        case '-':
+            return 2;
+        case '*':
+            return 3;
+        case '/':
+            return 3;
+        case '^':
+            return 4;
+        default:
+            throw new ArgumentException("Rossz parameter");
+    }
 }
