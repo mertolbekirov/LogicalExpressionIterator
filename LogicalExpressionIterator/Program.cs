@@ -25,27 +25,36 @@ while (true)
 
             var functionSignature = commandArr[0];
             var function = commandArr[1];
+            function = function.CustomReplace("\"", "");
+
 
             var functionNameVariablesArr = functionSignature.CustomSplitOnlyOnce('(');
-            var functionName = functionNameVariablesArr[0];
             var functionVariables = functionNameVariablesArr[1].CustomReplace(" ", "").CustomReplace(")", "").CustomSplit(',');
 
-            if (functionName == functionSignature)
+            if (!functionDict.ContainsKey(functionSignature))
             {
-                throw new ArgumentException("Invalid Syntax.");
+                Function functionObj = new Function
+                {
+                    Name = functionSignature,
+                };
+
+                foreach (var variable in functionVariables)
+                {
+                    functionObj.Variables.Add(variable[0]);
+                }
+
+                functionDict.Add(functionSignature, functionObj);
             }
 
-            Function functionObj = new Function
-            {
-                Name = functionName,
-            };
+            var functionArr = function.CustomSplit(' ');
 
-            foreach (var variable in functionVariables)
+            foreach (var item in functionArr)
             {
-                functionObj.Variables.Add(variable[0]);
+                if (true)
+                {
+
+                }
             }
-
-            functionDict.Add(functionName, functionObj);
 
             Console.WriteLine(RPNConvert(function)); 
 
@@ -59,12 +68,22 @@ while (true)
         default:
             throw new ArgumentException("Invalid Command.");
     }
+
+
+    string ReadFunctionFromOperatorNode(string functionName)
+    {
+        if (!treeDict.ContainsKey(functionName))
+        {
+            throw new ArgumentException("No such key");
+        }
+
+        return "";
+    }
 }
 
-static string RPNConvert(string input)
+static string RPNConvert(string str)
 {
     CustomStack<char> stack = new CustomStack<char>();
-    string str = input.CustomReplace(" ", string.Empty);
     SimpleStringBuilder formula = new SimpleStringBuilder();
     for (int i = 0; i < str.Length; i++)
     {
@@ -83,7 +102,7 @@ static string RPNConvert(string input)
         }
         else if (IsOperator(x))
         {
-            while (stack.Count > 0 && stack.Peek() != '(' && Prior(x) <= Prior(stack.Peek()))
+            while (stack.Count > 0 && stack.Peek() != '(')
                 formula.Append(stack.Pop());
             stack.Push(x);
         }
@@ -93,12 +112,49 @@ static string RPNConvert(string input)
             if (y != '(')
                 formula.Append(y);
         }
-    }
+    }   
     while (stack.Count > 0)
     {
         formula.Append(stack.Pop());
     }
     return formula.ToString();
+}
+
+static bool EvaluateRpn(string expression)
+{
+    // Create a stack to hold the numbers
+    var stack = new CustomStack<int>();
+
+    // Evaluate the expression
+    foreach (var token in expression)
+    {
+        // If the token is a number, push it onto the stack
+        if (int.TryParse(token.ToString(), out var number))
+        {
+            stack.Push(number);
+        }
+        else
+        {
+            // Otherwise, the token must be an operator
+            // So pop the last two numbers from the stack
+            var right = stack.Pop();
+            var left = stack.Pop();
+
+            // Perform the operation and push the result back onto the stack
+            switch (token)
+            {
+                case '*':
+                    stack.Push(left & right);
+                    break;
+                case '|':
+                    stack.Push(left | right);
+                    break;
+            }
+        }
+    }
+
+    // The final result should be the only remaining number on the stack
+    return stack.Pop() == 1 ? true : false;
 }
 
 static bool IsOperator(char c)
@@ -108,24 +164,4 @@ static bool IsOperator(char c)
 static bool IsOperand(char c)
 {
     return (c >= 'a' && c <= 'z');
-}
-static int Prior(char c)
-{
-    switch (c)
-    {
-        case '=':
-            return 1;
-        case '+':
-            return 2;
-        case '-':
-            return 2;
-        case '*':
-            return 3;
-        case '/':
-            return 3;
-        case '^':
-            return 4;
-        default:
-            throw new ArgumentException("Rossz parameter");
-    }
 }
